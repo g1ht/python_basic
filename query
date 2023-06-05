@@ -1,0 +1,15 @@
+SELECT pt.default_code x_product_code, pt.name x_product, pc.complete_name x_product_category, 
+sl.name x_warehouse, slc.complete_name x_location, spl.name x_lot_serial, spl.expiration_date x_expiry_date, 
+spl.removal_date x_removal_date, spl.use_date x_best_before_date, spl.alert_date x_alert_date, sq.quantity x_quantity, 
+sq.reserved_quantity x_reserved, sq.quantity - sq.reserved_quantity x_available_quantity, uu.name x_uom, 
+CASE WHEN spl.note IS NOT NULL THEN REGEXP_REPLACE(spl.note, '\s*(<[^>]+>|<script.+?<\/script>|<style.+?<\/style>)\s*', '','gi') ELSE NULL END x_expiry_info
+FROM stock_quant sq 
+INNER JOIN product_product pp ON sq.product_id = pp.id 
+INNER JOIN product_template pt ON pp.product_tmpl_id = pt.id 
+INNER JOIN uom_uom uu ON pt.uom_id = uu.id 
+INNER JOIN product_category pc ON pt.categ_id = pc.id 
+INNER JOIN stock_location sl ON sq.warehouse_id = sl.id 
+INNER JOIN stock_location slc ON sq.location_id = slc.id 
+LEFT JOIN stock_production_lot spl ON sq.lot_id = spl.id 
+where slc.usage = 'internal'
+
